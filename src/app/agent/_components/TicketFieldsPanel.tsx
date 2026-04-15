@@ -1,5 +1,6 @@
 import type { Ticket } from "@/lib/mockTickets";
 import { Badge } from "@/app/agent/_components/ui/Badge";
+import { ChevronRight } from "lucide-react";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -14,19 +15,35 @@ function PanelCard({
   title,
   subtitle,
   children,
+  onMore,
 }: {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
+  onMore?: () => void;
 }) {
   return (
     <section className="overflow-hidden rounded-lg border border-[var(--z-border)] bg-[var(--z-panel)]">
       {title ? (
         <div className="border-b border-[var(--z-border)] bg-[var(--z-panel-2)] px-3.5 py-2.5">
-          <div className="text-[11px] font-semibold text-slate-700">{title}</div>
-          {subtitle ? (
-            <div className="mt-0.5 text-[11px] text-slate-500">{subtitle}</div>
-          ) : null}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold text-slate-700">{title}</div>
+              {subtitle ? (
+                <div className="mt-0.5 text-[11px] text-slate-500">{subtitle}</div>
+              ) : null}
+            </div>
+            {onMore ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-[var(--z-brand)]"
+                aria-label="More"
+                onClick={onMore}
+              >
+                More <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
       <div className="px-3.5 py-3">{children}</div>

@@ -5,6 +5,7 @@ import type { Ticket } from "@/lib/mockTickets";
 import { Button } from "@/app/agent/_components/ui/Button";
 import { SentimentCard } from "@/app/agent/_components/LyzrPanel/SentimentCard";
 import { Badge } from "@/app/agent/_components/ui/Badge";
+import { kbCorpus } from "@/lib/kbCorpus";
 
 type KbArticle = {
   id: string;
@@ -34,44 +35,41 @@ export function OthersTab({
     "idle" | "pushing" | "success" | "error"
   >("idle");
 
+  const verifiedKbArticles = React.useMemo(() => {
+    const corpusById = new Map(kbCorpus.map((e) => [e.id, e] as const));
+    return insights.kbArticles
+      .map((a) => {
+        const corpus = corpusById.get(a.id);
+        if (!corpus) return null;
+
+        // "Working links" = only show URLs we control/ship in our known corpus.
+        // If the agent returns mismatched/invalid URLs, we ignore and render corpus URL instead.
+        try {
+          const url = new URL(corpus.url);
+          if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+        } catch {
+          return null;
+        }
+
+        return {
+          ...a,
+          title: corpus.title,
+          url: corpus.url,
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => Boolean(x));
+  }, [insights.kbArticles]);
+
   return (
     <div className="space-y-4">
-      <section className="rounded-lg border border-[var(--z-border)] bg-white p-3">
-        <div className="text-sm font-semibold text-slate-900">
-          Create a KB article from the ticket
-        </div>
-        <div className="mt-2 space-y-2 text-sm text-slate-700">
-          <div>
-            <div className="text-xs font-medium text-slate-500">Title</div>
-            <div className="mt-1 rounded-md border border-[var(--z-border)] bg-slate-50 px-2 py-2 text-sm">
-              {ticket.subject}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs font-medium text-slate-500">Article draft</div>
-            <div className="mt-1 rounded-md border border-[var(--z-border)] bg-slate-50 px-2 py-2 text-sm leading-6">
-              <div className="font-semibold">Problem</div>
-              <div className="mt-1">{insights.issueReported}</div>
-              <div className="mt-3 font-semibold">Resolution steps</div>
-              <ol className="mt-1 list-decimal pl-5">
-                {insights.nextSteps.slice(0, 3).map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ol>
-            </div>
-          </div>
-          <Button variant="secondary">Create KB article</Button>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[var(--z-border)] bg-white p-3">
+      <section className="rounded-lg border border-[var(--z-border)] bg-[color-mix(in_srgb,var(--z-brand)_4%,white)] p-3">
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold text-slate-900">KB articles</div>
           <div className="text-xs text-slate-500">{isLoading ? "Updating…" : "Suggested"}</div>
         </div>
         <div className="mt-2 space-y-2 text-sm text-slate-700">
-          {insights.kbArticles.length ? (
-            insights.kbArticles.map((a) => (
+          {verifiedKbArticles.length ? (
+            verifiedKbArticles.map((a) => (
               <a
                 key={a.id}
                 href={a.url}
@@ -83,6 +81,9 @@ export function OthersTab({
                   <div className="min-w-0">
                     <div className="truncate font-semibold text-slate-900">{a.title}</div>
                     <div className="mt-0.5 text-xs text-slate-600">{a.why_relevant}</div>
+                    <div className="mt-1">
+                      <Badge variant="info">Verified link</Badge>
+                    </div>
                   </div>
                   <div className="shrink-0 text-xs text-slate-500">
                     {Math.round(a.confidence * 100)}%
@@ -92,13 +93,13 @@ export function OthersTab({
             ))
           ) : (
             <div className="rounded-md border border-[var(--z-border)] bg-slate-50 p-2 text-xs text-slate-600">
-              No relevant KB articles found.
+              No verified KB articles found.
             </div>
           )}
         </div>
       </section>
 
-      <section className="rounded-lg border border-[var(--z-border)] bg-white p-3">
+      <section className="rounded-lg border border-[var(--z-border)] bg-[color-mix(in_srgb,var(--z-success)_6%,white)] p-3">
         <div className="text-sm font-semibold text-slate-900">
           Customer Sentiment Analysis
         </div>
@@ -107,7 +108,7 @@ export function OthersTab({
         </div>
       </section>
 
-      <section className="rounded-lg border border-[var(--z-border)] bg-white p-3">
+      <section className="rounded-lg border border-[var(--z-border)] bg-[color-mix(in_srgb,var(--z-brand)_3%,white)] p-3">
         <div className="text-sm font-semibold text-slate-900">
           Push to Salesforce
         </div>

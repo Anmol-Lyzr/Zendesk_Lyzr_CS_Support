@@ -69,15 +69,24 @@ export function LyzrPanel({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-[var(--z-border)] px-4 py-3">
-        <div className="flex min-w-0 items-center">
-          <Image
-            src="/lyzr-agent-studio-logo-v3.png"
-            alt="lyzr AGENT STUDIO"
-            width={200}
-            height={40}
-            className="h-9 w-auto max-w-[min(100%,220px)] object-contain object-left"
-            priority
-          />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--z-brand)_10%,white)]">
+            <div className="h-8 w-8 overflow-hidden rounded-xl bg-white shadow-[0_1px_0_rgba(15,23,42,0.04)]">
+              <Image
+                src="/lyzr-mark.png"
+                alt="Lyzr"
+                width={64}
+                height={64}
+                className="h-8 w-8 object-contain"
+                priority
+              />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-[15px] font-semibold text-slate-900">
+              Lyzr
+            </div>
+          </div>
         </div>
         <button
           type="button"

@@ -6,6 +6,21 @@ import { Button } from "@/app/agent/_components/ui/Button";
 import { Paperclip, SendHorizontal, Smile } from "lucide-react";
 import { useDraftStore } from "@/app/agent/_state/draftStore";
 
+function LyzrLogoIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor" />
+      <path
+        d="M8 7.5 12 11.5 9.5 14 12 16.5M16 7.5 12 11.5 14.5 14 12 16.5"
+        stroke="#fff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ReplyComposer({ ticket }: { ticket: Ticket }) {
   const { draftByTicketId, setDraft } = useDraftStore();
   const value = draftByTicketId[ticket.id] ?? "";
@@ -46,15 +61,6 @@ export function ReplyComposer({ ticket }: { ticket: Ticket }) {
             <span>·</span>
             <span className="truncate">{ticket.requester.name}, {ticket.assigneeName}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => void draftWithLyzr()}
-            className="shrink-0 rounded-full border border-[var(--z-border)] bg-white px-2.5 py-1 font-semibold text-[var(--z-brand)] hover:bg-[color-mix(in_srgb,var(--z-brand)_8%,white)]"
-            aria-label="Draft with Lyzr"
-            disabled={isDrafting}
-          >
-            {isDrafting ? "Drafting…" : "Draft with Lyzr"}
-          </button>
         </div>
 
         <div className="mt-2 overflow-hidden rounded-xl border border-[var(--z-border)] bg-white shadow-[0_1px_0_rgba(15,23,42,0.04)] [color-scheme:light]">
@@ -82,6 +88,15 @@ export function ReplyComposer({ ticket }: { ticket: Ticket }) {
                 aria-label="Attach file"
               >
                 <Paperclip className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => void draftWithLyzr()}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Draft with Lyzr"
+                disabled={isDrafting}
+              >
+                <LyzrLogoIcon className="h-5 w-5 text-black" />
               </button>
             </div>
             <div className="flex items-center gap-2">
