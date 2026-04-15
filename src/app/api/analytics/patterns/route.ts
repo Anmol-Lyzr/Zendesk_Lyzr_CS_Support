@@ -126,7 +126,7 @@ function recommendedActionsForKey(key: string): string[] {
   }
 }
 
-function severityForTickets(group: Ticket[]) {
+function severityForTickets(group: Ticket[]): "low" | "medium" | "high" {
   const urgent = group.filter((t) => t.isUrgent || t.priority === "urgent").length;
   const recurring = group.filter((t) => t.isRecurring).length;
   if (urgent >= 2 || recurring >= Math.max(2, Math.ceil(group.length * 0.6))) return "high";

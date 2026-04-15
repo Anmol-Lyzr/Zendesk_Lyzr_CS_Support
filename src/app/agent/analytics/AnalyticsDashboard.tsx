@@ -160,6 +160,7 @@ export function AnalyticsDashboard() {
 
   React.useEffect(() => {
     if (!selectedWeek) return;
+    const { weekStart, weekEnd } = selectedWeek;
     let cancelled = false;
 
     async function loadPatterns() {
@@ -170,8 +171,8 @@ export function AnalyticsDashboard() {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            weekStart: selectedWeek.weekStart,
-            weekEnd: selectedWeek.weekEnd,
+            weekStart,
+            weekEnd,
           }),
         });
         if (!res.ok) throw new Error(`Patterns failed (${res.status})`);
@@ -195,8 +196,8 @@ export function AnalyticsDashboard() {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            weekStart: selectedWeek.weekStart,
-            weekEnd: selectedWeek.weekEnd,
+            weekStart,
+            weekEnd,
           }),
         });
         if (!res.ok) throw new Error(`Feature requests failed (${res.status})`);
