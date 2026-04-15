@@ -6,6 +6,7 @@ import { Badge } from "@/app/agent/_components/ui/Badge";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { formatShortDateFromYmd } from "@/lib/dates";
+import { ChevronDown } from "lucide-react";
 
 type WeeklyCategory = {
   key: string;
@@ -74,30 +75,102 @@ function SparkBars({ values }: { values: number[] }) {
   );
 }
 
-function Section({
+function CollapsibleSection({
   title,
   subtitle,
   right,
   children,
+  defaultOpen = true,
 }: {
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
   children: React.ReactNode;
+  defaultOpen?: boolean;
 }) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  const contentId = React.useId();
   return (
     <section className="rounded-xl border border-[var(--z-border)] bg-white">
-      <div className="flex items-start justify-between gap-3 border-b border-[var(--z-border)] px-4 py-3">
-        <div>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={contentId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-start justify-between gap-3 border-b border-[var(--z-border)] px-4 py-3 text-left hover:bg-[var(--z-hover)]"
+      >
+        <div className="min-w-0">
           <div className="text-sm font-semibold text-slate-900">{title}</div>
-          {subtitle ? (
-            <div className="mt-0.5 text-xs text-slate-500">{subtitle}</div>
-          ) : null}
+          {subtitle ? <div className="mt-0.5 text-xs text-slate-500">{subtitle}</div> : null}
         </div>
-        {right ? <div className="shrink-0">{right}</div> : null}
+        <div className="flex shrink-0 items-center gap-2">
+          {right ? <div className="shrink-0">{right}</div> : null}
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-slate-500 transition-transform duration-200",
+              open ? "rotate-180" : "rotate-0"
+            )}
+          />
+        </div>
+      </button>
+
+      <div
+        id={contentId}
+        className={cn(
+          "grid transition-[grid-template-rows] duration-200",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="p-4">{children}</div>
+        </div>
       </div>
-      <div className="p-4">{children}</div>
     </section>
+  );
+}
+
+function CollapsibleCard({
+  title,
+  defaultOpen = true,
+  children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  const contentId = React.useId();
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-[var(--z-border)] bg-white">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={contentId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-[var(--z-hover)]"
+      >
+        <div className="text-xs font-semibold text-slate-700">{title}</div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-slate-500 transition-transform duration-200",
+            open ? "rotate-180" : "rotate-0"
+          )}
+        />
+      </button>
+
+      <div
+        id={contentId}
+        className={cn(
+          "grid transition-[grid-template-rows] duration-200",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="px-4 pb-4">{children}</div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -328,7 +401,7 @@ export function AnalyticsDashboard() {
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-5">
-              <Section
+              <CollapsibleSection
                 title="Issue pattern recognition"
                 subtitle={
                   selectedWeek
@@ -401,11 +474,8 @@ export function AnalyticsDashboard() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[var(--z-border)] bg-white p-4">
-                <div className="text-xs font-semibold text-slate-700">
-                  Actionable patterns
-                </div>
-                <div className="mt-3 space-y-3">
+              <CollapsibleCard title="Actionable patterns" defaultOpen>
+                <div className="space-y-3">
                   {patterns?.patterns?.length ? (
                     patterns.patterns.slice(0, 4).map((p) => (
                       <div
@@ -465,11 +535,11 @@ export function AnalyticsDashboard() {
                     </div>
                   )}
                 </div>
-              </div>
+              </CollapsibleCard>
             </div>
-              </Section>
+              </CollapsibleSection>
 
-            <Section
+            <CollapsibleSection
               title="Feature requests"
               subtitle="Detected product requests you can push to Salesforce"
               right={
@@ -565,7 +635,7 @@ export function AnalyticsDashboard() {
                 </div>
               )}
             </div>
-            </Section>
+            </CollapsibleSection>
         </div>
       </div>
       </div>
