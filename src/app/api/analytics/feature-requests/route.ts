@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { tickets, type Ticket } from "@/lib/mockTickets";
+import { endOfLocalDayFromYmd, startOfLocalDayFromYmd } from "@/lib/dates";
 
 type FeatureRequestsResponse = {
   weekStart: string;
@@ -70,8 +71,8 @@ function escapeControlCharsInsideStrings(input: string) {
 }
 
 function withinRange(t: Ticket, start: Date, end: Date) {
-  const created = new Date(t.createdAt).getTime();
-  return created >= start.getTime() && created <= end.getTime();
+  const updated = new Date(t.updatedAt).getTime();
+  return updated >= start.getTime() && updated <= end.getTime();
 }
 
 function extractText(t: Ticket) {
@@ -229,8 +230,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing weekStart/weekEnd" }, { status: 400 });
   }
 
-  const start = new Date(`${weekStart}T00:00:00.000Z`);
-  const end = new Date(`${weekEnd}T23:59:59.999Z`);
+  const start = startOfLocalDayFromYmd(weekStart);
+  const end = endOfLocalDayFromYmd(weekEnd);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
   }

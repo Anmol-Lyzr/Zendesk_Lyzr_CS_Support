@@ -684,8 +684,3 @@ export function getCustomerTickets(customerId: string) {
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
-export function formatShortDate(isoString: string) {
-  const d = new Date(isoString);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
-

@@ -1,7 +1,7 @@
 import { tickets } from "@/lib/mockTickets";
 import { AgentShell } from "@/app/agent/_components/AgentShell";
 import Link from "next/link";
-import { formatShortDate } from "@/lib/mockTickets";
+import { formatShortDate } from "@/lib/dates";
 import {
   ChevronDown,
   Headphones,

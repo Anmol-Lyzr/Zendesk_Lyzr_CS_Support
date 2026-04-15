@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Ticket } from "@/lib/mockTickets";
-import { formatShortDate } from "@/lib/mockTickets";
+import { formatShortDate } from "@/lib/dates";
 import { Badge } from "@/app/agent/_components/ui/Badge";
 import { Search } from "lucide-react";
 

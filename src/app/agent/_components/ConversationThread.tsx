@@ -1,15 +1,6 @@
 import type { Ticket } from "@/lib/mockTickets";
 import { cn } from "@/lib/cn";
-
-function formatTime(isoString: string) {
-  const d = new Date(isoString);
-  return d.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatShortDateTime } from "@/lib/dates";
 
 export function ConversationThread({ ticket }: { ticket: Ticket }) {
   return (
@@ -37,7 +28,7 @@ export function ConversationThread({ ticket }: { ticket: Ticket }) {
                       </span>
                     ) : null}
                     <div className="text-xs text-slate-500">
-                      {formatTime(m.createdAt)}
+                      {formatShortDateTime(m.createdAt)}
                     </div>
                   </div>
                   <div

@@ -11,10 +11,10 @@ export function AgentShell({
 }: {
   topTabs?: React.ReactNode;
   leftRail?: React.ReactNode;
-  leftPanel: React.ReactNode;
+  leftPanel?: React.ReactNode;
   centerHeader?: React.ReactNode;
   center: React.ReactNode;
-  rightPanel: React.ReactNode;
+  rightPanel?: React.ReactNode;
 }) {
   return (
     <div className="h-screen overflow-hidden bg-[var(--z-canvas)]">
@@ -40,9 +40,11 @@ export function AgentShell({
           ) : null}
 
           <div className="flex min-h-0 flex-1">
-            <section className="min-h-0 w-[320px] shrink-0 overflow-hidden border-r border-[var(--z-border)] bg-[var(--z-panel)]">
-              {leftPanel}
-            </section>
+            {leftPanel ? (
+              <section className="min-h-0 w-[320px] shrink-0 overflow-hidden border-r border-[var(--z-border)] bg-[var(--z-panel)]">
+                {leftPanel}
+              </section>
+            ) : null}
 
             <section className="flex min-h-0 min-w-0 flex-1 flex-col">
               {centerHeader ? (
@@ -53,9 +55,11 @@ export function AgentShell({
               <div className="flex min-h-0 flex-1 min-w-0">{center}</div>
             </section>
 
-            <aside className="min-h-0 w-[360px] shrink-0 overflow-hidden border-l border-[var(--z-border)] bg-[var(--z-panel)]">
-              {rightPanel}
-            </aside>
+            {rightPanel ? (
+              <aside className="min-h-0 w-[360px] shrink-0 overflow-hidden border-l border-[var(--z-border)] bg-[var(--z-panel)]">
+                {rightPanel}
+              </aside>
+            ) : null}
           </div>
         </main>
       </div>

@@ -5,6 +5,7 @@ import { Button } from "@/app/agent/_components/ui/Button";
 import { Badge } from "@/app/agent/_components/ui/Badge";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { formatShortDateFromYmd } from "@/lib/dates";
 
 type WeeklyCategory = {
   key: string;
@@ -54,7 +55,7 @@ type FeatureRequestsResponse = {
 };
 
 function formatWeekLabel(weekStart: string, weekEnd: string) {
-  return `${weekStart} → ${weekEnd}`;
+  return `${formatShortDateFromYmd(weekStart)} → ${formatShortDateFromYmd(weekEnd)}`;
 }
 
 function SparkBars({ values }: { values: number[] }) {
@@ -255,99 +256,98 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="min-h-0 flex-1 overflow-auto p-5">
-      <div className="rounded-2xl border border-[color-mix(in_srgb,var(--z-brand)_25%,white)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--z-brand)_18%,white),white_60%)] p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="text-sm font-semibold tracking-tight text-slate-900">
-              Agent Analytics Overview
-            </div>
-            <div className="mt-1 text-xs text-slate-600">
-              Weekly patterns and product signals extracted from support tickets.
-            </div>
-          </div>
+      <div>
+        <div className="rounded-2xl border border-[color-mix(in_srgb,var(--z-brand)_25%,white)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--z-brand)_18%,white),white_60%)] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="text-sm font-semibold tracking-tight text-slate-900">
+                  Agent Analytics Overview
+                </div>
+                <div className="mt-1 text-xs text-slate-600">
+                  Weekly patterns and product signals extracted from support tickets.
+                </div>
+              </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {weekly?.slice(0, 6).map((w) => {
-              const selected = w.weekStart === selectedWeekStart;
-              return (
-                <button
-                  key={w.weekStart}
-                  type="button"
-                  onClick={() => setSelectedWeekStart(w.weekStart)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs transition-colors",
-                    selected
-                      ? "border-[color-mix(in_srgb,var(--z-brand)_35%,white)] bg-[color-mix(in_srgb,var(--z-brand)_10%,white)] text-slate-900"
-                      : "border-[var(--z-border)] bg-white text-slate-700 hover:bg-[var(--z-hover)]"
-                  )}
-                  title={formatWeekLabel(w.weekStart, w.weekEnd)}
-                >
-                  {w.weekStart}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {weekly?.slice(0, 6).map((w) => {
+                  const selected = w.weekStart === selectedWeekStart;
+                  return (
+                    <button
+                      key={w.weekStart}
+                      type="button"
+                      onClick={() => setSelectedWeekStart(w.weekStart)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-xs transition-colors",
+                        selected
+                          ? "border-[color-mix(in_srgb,var(--z-brand)_35%,white)] bg-[color-mix(in_srgb,var(--z-brand)_10%,white)] text-slate-900"
+                          : "border-[var(--z-border)] bg-white text-slate-700 hover:bg-[var(--z-hover)]"
+                      )}
+                      title={formatWeekLabel(w.weekStart, w.weekEnd)}
+                    >
+                      {formatShortDateFromYmd(w.weekStart)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5">
-          <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
-            <div className="text-xs text-slate-500">Tickets analyzed</div>
-            <div className="mt-2 text-2xl font-semibold text-slate-900">
-              {selectedWeek?.totals.tickets ?? "—"}
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5">
+              <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
+                <div className="text-xs text-slate-500">Tickets analyzed</div>
+                <div className="mt-2 text-2xl font-semibold text-slate-900">
+                  {selectedWeek?.totals.tickets ?? "—"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
+                <div className="text-xs text-slate-500">Urgent signals</div>
+                <div className="mt-2 text-2xl font-semibold text-slate-900">
+                  {kpi.urgent ?? "—"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
+                <div className="text-xs text-slate-500">Recurring issues</div>
+                <div className="mt-2 text-2xl font-semibold text-slate-900">
+                  {kpi.recurring ?? "—"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
+                <div className="text-xs text-slate-500">Patterns detected</div>
+                <div className="mt-2 text-2xl font-semibold text-slate-900">
+                  {kpi.patternsCount || "—"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs text-slate-500">Weekly trend</div>
+                  <span className="text-[11px] text-slate-400">last {weeklyBars.length}</span>
+                </div>
+                <div className="mt-3">
+                  <SparkBars values={weeklyBars} />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
-            <div className="text-xs text-slate-500">Urgent signals</div>
-            <div className="mt-2 text-2xl font-semibold text-slate-900">
-              {kpi.urgent ?? "—"}
-            </div>
-          </div>
-          <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
-            <div className="text-xs text-slate-500">Recurring issues</div>
-            <div className="mt-2 text-2xl font-semibold text-slate-900">
-              {kpi.recurring ?? "—"}
-            </div>
-          </div>
-          <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
-            <div className="text-xs text-slate-500">Patterns detected</div>
-            <div className="mt-2 text-2xl font-semibold text-slate-900">
-              {kpi.patternsCount || "—"}
-            </div>
-          </div>
-          <div className="rounded-xl border border-[var(--z-border)] bg-white p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-xs text-slate-500">Weekly trend</div>
-              <span className="text-[11px] text-slate-400">last {weeklyBars.length}</span>
-            </div>
-            <div className="mt-3">
-              <SparkBars values={weeklyBars} />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <div className="space-y-5 xl:col-span-2">
-          <Section
-            title="Issue pattern recognition"
-            subtitle={
-              selectedWeek
-                ? `Insights for ${formatWeekLabel(
-                    selectedWeek.weekStart,
-                    selectedWeek.weekEnd
-                  )}`
-                : "Select a week to see insights"
-            }
-            right={
-              patternsLoading ? (
-                <Badge variant="info">Analyzing…</Badge>
-              ) : patternsError ? (
-                <Badge variant="danger">Error</Badge>
-              ) : (
-                <Badge variant="success">Ready</Badge>
-              )
-            }
-          >
+            <div className="mt-5 grid grid-cols-1 gap-5">
+              <Section
+                title="Issue pattern recognition"
+                subtitle={
+                  selectedWeek
+                    ? `Insights for ${formatWeekLabel(
+                        selectedWeek.weekStart,
+                        selectedWeek.weekEnd
+                      )}`
+                    : "Select a week to see insights"
+                }
+                right={
+                  patternsLoading ? (
+                    <Badge variant="info">Analyzing…</Badge>
+                  ) : patternsError ? (
+                    <Badge variant="danger">Error</Badge>
+                  ) : (
+                    <Badge variant="success">Ready</Badge>
+                  )
+                }
+              >
             {weeklyError ? (
               <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                 {weeklyError}
@@ -360,8 +360,8 @@ export function AnalyticsDashboard() {
               </div>
             ) : null}
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-[var(--z-border)] bg-white p-3">
+            <div className="space-y-4">
+              <div className="rounded-lg border border-[var(--z-border)] bg-white p-4">
                 <div className="text-xs font-semibold text-slate-700">
                   Top issue categories
                 </div>
@@ -370,7 +370,7 @@ export function AnalyticsDashboard() {
                     selectedWeek.topIssues.slice(0, 6).map((c) => (
                       <div key={c.key} className="flex items-center justify-between gap-3">
                         <div className="min-w-0 text-sm text-slate-700">
-                          <span className="truncate">{c.label}</span>
+                          <span className="break-words leading-5">{c.label}</span>
                         </div>
                         <div className="shrink-0 text-xs text-slate-600">
                           <span className="font-semibold text-slate-900">
@@ -401,7 +401,7 @@ export function AnalyticsDashboard() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[var(--z-border)] bg-white p-3">
+              <div className="rounded-lg border border-[var(--z-border)] bg-white p-4">
                 <div className="text-xs font-semibold text-slate-700">
                   Actionable patterns
                 </div>
@@ -410,20 +410,22 @@ export function AnalyticsDashboard() {
                     patterns.patterns.slice(0, 4).map((p) => (
                       <div
                         key={p.title}
-                        className="rounded-md border border-[var(--z-border)] bg-white p-3"
+                        className="rounded-lg border border-[var(--z-border)] bg-white p-4"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="truncate text-sm font-semibold text-slate-900">
+                            <div className="text-sm font-semibold leading-5 text-slate-900">
                               {p.title}
                             </div>
-                            <div className="mt-1 text-xs text-slate-600">
-                              {p.count} tickets • Evidence:{" "}
+                            <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-slate-600">
+                              <span>{p.count} tickets</span>
+                              <span aria-hidden="true">•</span>
+                              <span className="font-medium text-slate-700">Evidence:</span>
                               {p.evidence_ticket_ids.slice(0, 3).map((id) => (
                                 <Link
                                   key={id}
                                   href={`/agent/tickets/${id}`}
-                                  className="text-[var(--z-brand)] hover:underline"
+                                  className="rounded-sm px-1 py-0.5 text-[var(--z-brand)] hover:bg-[color-mix(in_srgb,var(--z-brand)_10%,white)] hover:underline"
                                 >
                                   #{id}
                                 </Link>
@@ -445,11 +447,15 @@ export function AnalyticsDashboard() {
                           ) : null}
                         </div>
                         {p.recommended_actions?.length ? (
-                          <ul className="mt-2 list-disc pl-5 text-xs text-slate-700">
-                            {p.recommended_actions.slice(0, 3).map((a) => (
-                              <li key={a}>{a}</li>
-                            ))}
-                          </ul>
+                          <div className="mt-2 max-h-32 overflow-auto pr-1">
+                            <ul className="list-disc space-y-1 pl-5 text-xs leading-5 text-slate-700">
+                              {p.recommended_actions.map((a) => (
+                                <li key={a} className="break-words">
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         ) : null}
                       </div>
                     ))
@@ -461,23 +467,21 @@ export function AnalyticsDashboard() {
                 </div>
               </div>
             </div>
-          </Section>
-        </div>
+              </Section>
 
-        <div className="space-y-5">
-          <Section
-            title="Feature requests"
-            subtitle="Detected product requests you can push to Salesforce"
-            right={
-              featureLoading ? (
-                <Badge variant="info">Extracting…</Badge>
-              ) : featureError ? (
-                <Badge variant="danger">Error</Badge>
-              ) : (
-                <Badge variant="success">Ready</Badge>
-              )
-            }
-          >
+            <Section
+              title="Feature requests"
+              subtitle="Detected product requests you can push to Salesforce"
+              right={
+                featureLoading ? (
+                  <Badge variant="info">Extracting…</Badge>
+                ) : featureError ? (
+                  <Badge variant="danger">Error</Badge>
+                ) : (
+                  <Badge variant="success">Ready</Badge>
+                )
+              }
+            >
             {featureError ? (
               <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
                 {featureError}
@@ -495,7 +499,7 @@ export function AnalyticsDashboard() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-slate-900">
+                          <div className="text-sm font-semibold leading-5 text-slate-900">
                             {r.title}
                           </div>
                           <div className="mt-1 text-xs text-slate-600">
@@ -514,7 +518,7 @@ export function AnalyticsDashboard() {
                         </Badge>
                       </div>
 
-                      <div className="mt-2 text-xs leading-5 text-slate-700">
+                      <div className="mt-2 text-xs leading-5 text-slate-700 break-words">
                         {r.description}
                       </div>
 
@@ -561,8 +565,9 @@ export function AnalyticsDashboard() {
                 </div>
               )}
             </div>
-          </Section>
+            </Section>
         </div>
+      </div>
       </div>
     </div>
   );

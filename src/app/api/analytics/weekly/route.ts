@@ -70,7 +70,7 @@ type WeekBucket = {
 
 export async function GET() {
   // Compute last 8 ISO weeks present in the dataset (descending).
-  const ticketDates = tickets.map((t) => new Date(t.createdAt));
+  const ticketDates = tickets.map((t) => new Date(t.updatedAt));
   const latest = ticketDates.reduce(
     (acc, d) => (d > acc ? d : acc),
     new Date(0)
@@ -93,8 +93,8 @@ export async function GET() {
 
   const byWeekStart = new Map(weeks.map((w) => [w.weekStart, w]));
   for (const t of tickets) {
-    const created = new Date(t.createdAt);
-    const ws = toYmd(startOfIsoWeek(created));
+    const updated = new Date(t.updatedAt);
+    const ws = toYmd(startOfIsoWeek(updated));
     const bucket = byWeekStart.get(ws);
     if (!bucket) continue;
 
