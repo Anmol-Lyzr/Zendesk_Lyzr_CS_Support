@@ -23,7 +23,7 @@ function PanelCard({
   onMore?: () => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-[var(--z-border)] bg-[var(--z-panel)]">
+    <section className="rounded-lg border border-[var(--z-border)] bg-[var(--z-panel)]">
       {title ? (
         <div className="border-b border-[var(--z-border)] bg-[var(--z-panel-2)] px-3.5 py-2.5">
           <div className="flex items-start justify-between gap-3">
@@ -69,8 +69,8 @@ export function TicketFieldsPanel({ ticket }: { ticket: Ticket }) {
                 {ticket.requester.name.slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="truncate font-medium">{ticket.requester.name}</div>
-                <div className="truncate text-[12px] text-slate-500">
+                <div className="break-words font-medium leading-5">{ticket.requester.name}</div>
+                <div className="break-words text-[12px] text-slate-500">
                   {ticket.requester.orgName}
                 </div>
               </div>
@@ -78,8 +78,10 @@ export function TicketFieldsPanel({ ticket }: { ticket: Ticket }) {
           </Field>
           <div className="mt-3 grid gap-3">
             <Field label="Assignee">
-              <div className="flex items-center justify-between gap-3">
-                <span className="truncate font-medium">{ticket.assigneeName}</span>
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <span className="min-w-0 flex-1 break-words font-medium leading-5">
+                  {ticket.assigneeName}
+                </span>
                 <button
                   type="button"
                   className="shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold text-[var(--z-brand)] hover:bg-[color-mix(in_srgb,var(--z-brand)_10%,white)]"
@@ -89,8 +91,8 @@ export function TicketFieldsPanel({ ticket }: { ticket: Ticket }) {
               </div>
             </Field>
             <Field label="Followers">
-              <div className="flex items-center justify-between gap-3">
-                <span className="min-w-0 truncate text-slate-700">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <span className="min-w-0 flex-1 break-words text-slate-700 leading-5">
                   {ticket.followers.length ? ticket.followers.join(", ") : "—"}
                 </span>
                 <button
@@ -107,7 +109,11 @@ export function TicketFieldsPanel({ ticket }: { ticket: Ticket }) {
         <PanelCard title="Tags">
           <div className="flex flex-wrap gap-2">
             {ticket.tags.map((t) => (
-              <Badge key={t} variant="neutral">
+              <Badge
+                key={t}
+                variant="neutral"
+                className="max-w-full whitespace-normal break-all leading-4"
+              >
                 {t}
               </Badge>
             ))}

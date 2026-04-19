@@ -99,7 +99,7 @@ export function OthersTab({
         </div>
       </section>
 
-      <section className="rounded-lg border border-[var(--z-border)] bg-[color-mix(in_srgb,var(--z-success)_6%,white)] p-3">
+      <section className="rounded-lg border border-[var(--z-border)] bg-[color-mix(in_srgb,var(--z-brand)_4%,white)] p-3">
         <div className="text-sm font-semibold text-slate-900">
           Customer Sentiment Analysis
         </div>

@@ -138,17 +138,78 @@ export async function GET(
   const userId = process.env.LYZR_USER_ID;
   const baseUrl = process.env.LYZR_INFERENCE_BASE_URL ?? "https://agent-prod.studio.lyzr.ai";
 
+  function normalizeForMatch(s: string) {
+    return s.toLowerCase().replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  function buildFallbackKbArticles() {
+    // Best-effort KB recommendations for local dev when LYZR_* env vars are not configured.
+    const corpusById = new Map(kbCorpus.map((e) => [e.id, e] as const));
+    if (!corpusById.size) return [];
+
+    const matchText = normalizeForMatch(
+      [
+        ticket.subject,
+        ticket.lyzr.issueReported,
+        ticket.lyzr.summary,
+        ...(ticket.tags ?? []),
+      ].join(" ")
+    );
+
+    const scored = kbCorpus
+      .map((entry) => {
+        const keywords = (entry.keywords ?? []).map(normalizeForMatch);
+        const matched = keywords.filter((kw) => kw.length > 0 && matchText.includes(kw));
+        const score = matched.length;
+        return { entry, matched, score };
+      })
+      .filter((x) => x.score > 0);
+
+    const sorted = scored.sort((a, b) => b.score - a.score).slice(0, 4);
+    return sorted.map(({ entry, matched, score }) => {
+      const shown = matched.slice(0, 3);
+      const why_relevant = shown.length
+        ? `Relevant to this ticket because it matches: ${shown.join(", ")}.`
+        : `Relevant to this ticket based on its reported symptoms.`;
+
+      return {
+        id: entry.id,
+        title: entry.title,
+        url: entry.url,
+        why_relevant,
+        confidence: Math.max(0.45, Math.min(0.95, 0.45 + 0.1 * score)),
+      };
+    });
+  }
+
+  function buildFallbackInsights(): TicketInsights {
+    const kb_articles = buildFallbackKbArticles();
+    return {
+      summary: ticket.lyzr.summary,
+      issue_reported: ticket.lyzr.issueReported,
+      next_steps: ticket.lyzr.nextSteps,
+      draft_response: ticket.lyzr.draftResponse,
+      kb_articles,
+    };
+  }
+
   if (!apiKey || !agentId || !userId) {
+    // Local dev fallback:
+    // If LYZR_* env vars aren't configured, we still want the UI to render using
+    // precomputed mock outputs (from `mockTickets`) rather than showing an error.
+    const missing = {
+      LYZR_API_KEY: !apiKey,
+      LYZR_AGENT_ID: !agentId,
+      LYZR_USER_ID: !userId,
+    };
+
     return NextResponse.json(
       {
-        error: "Missing server configuration",
-        missing: {
-          LYZR_API_KEY: !apiKey,
-          LYZR_AGENT_ID: !agentId,
-          LYZR_USER_ID: !userId,
-        },
+        ...buildFallbackInsights(),
+        fallback: true,
+        missing,
       },
-      { status: 500 }
+      { status: 200 }
     );
   }
 

@@ -26,7 +26,7 @@ export function AgentShell({
 
         <main className="flex min-h-0 min-w-0 flex-1 flex-col">
           {topTabs ? (
-            <div className="flex min-w-0 items-center justify-between gap-4 border-b border-[var(--z-border)] bg-[var(--z-panel)] px-4 py-2.5">
+            <div className="flex min-w-0 items-center justify-between gap-4 border-b border-[var(--z-border)] bg-[var(--z-panel)] px-5 py-2.5">
               {topTabs}
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <span className="rounded-full bg-slate-100 px-2 py-1">
@@ -41,7 +41,7 @@ export function AgentShell({
 
           <div className="flex min-h-0 flex-1">
             {leftPanel ? (
-              <section className="min-h-0 w-[320px] shrink-0 overflow-hidden border-r border-[var(--z-border)] bg-[var(--z-panel)]">
+              <section className="min-h-0 w-[clamp(300px,24vw,360px)] shrink-0 overflow-hidden border-r border-[var(--z-border)] bg-[var(--z-panel)]">
                 {leftPanel}
               </section>
             ) : null}
@@ -56,7 +56,7 @@ export function AgentShell({
             </section>
 
             {rightPanel ? (
-              <aside className="min-h-0 w-[360px] shrink-0 overflow-hidden border-l border-[var(--z-border)] bg-[var(--z-panel)]">
+              <aside className="min-h-0 w-[clamp(300px,24vw,340px)] shrink-0 overflow-hidden border-l border-[var(--z-border)] bg-[var(--z-panel)]">
                 {rightPanel}
               </aside>
             ) : null}

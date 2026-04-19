@@ -2,6 +2,30 @@ import type { Ticket } from "@/lib/mockTickets";
 import { cn } from "@/lib/cn";
 import { formatShortDateTime } from "@/lib/dates";
 
+function authorRoleBadge(authorType: "customer" | "agent" | "system") {
+  switch (authorType) {
+    case "customer":
+      return (
+        <span className="rounded-md bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">
+          Customer
+        </span>
+      );
+    case "agent":
+      return (
+        <span className="rounded-md bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold text-indigo-800">
+          Support Agent
+        </span>
+      );
+    case "system":
+    default:
+      return (
+        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+          System
+        </span>
+      );
+  }
+}
+
 export function ConversationThread({ ticket }: { ticket: Ticket }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-[var(--z-canvas)] px-6 py-5">
@@ -22,6 +46,7 @@ export function ConversationThread({ ticket }: { ticket: Ticket }) {
                     <div className="text-sm font-semibold text-slate-900">
                       {m.authorName}
                     </div>
+                    {authorRoleBadge(m.authorType)}
                     {m.visibility === "internal" ? (
                       <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
                         internal
