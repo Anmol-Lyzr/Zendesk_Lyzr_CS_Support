@@ -150,18 +150,18 @@ function FeatureRequestsBarChart({
 }) {
   const top = items.slice(0, 10);
   const max = Math.max(1, ...top.map((x) => x.tickets));
-  const [hovered, setHovered] = React.useState<null | { title: string; tickets: number }>(
-    null
-  );
+  const [hovered, setHovered] = React.useState<null | { title: string; tickets: number; x: number; y: number }>(null);
 
   const padL = 44;
   const padR = 16;
   const padT = 14;
-  const padB = 78;
+  const padB = 22;
   const w = 980;
-  const h = 300;
+  const h = 238;
   const iw = w - padL - padR;
   const ih = h - padT - padB;
+  const padLPct = (padL / w) * 100;
+  const padRPct = (padR / w) * 100;
 
   const yTicks = React.useMemo(() => {
     const ticks = 4;
@@ -229,24 +229,16 @@ function FeatureRequestsBarChart({
             />
 
             <text
-              x={16}
+              x={18}
               y={padT + ih / 2}
-              transform={`rotate(-90 16 ${padT + ih / 2})`}
+              transform={`rotate(-90 18 ${padT + ih / 2})`}
               textAnchor="middle"
               fontSize="12"
               fill="#64748b"
             >
               Tickets
             </text>
-            <text
-              x={padL + iw / 2}
-              y={h - 10}
-              textAnchor="middle"
-              fontSize="12"
-              fill="#64748b"
-            >
-              Feature requests
-            </text>
+            {/* x-axis label is rendered below as HTML for better layout */}
 
             {/* bars */}
             {top.map((x, idx) => {
@@ -271,39 +263,65 @@ function FeatureRequestsBarChart({
                         ? "fill-[color-mix(in_srgb,var(--z-brand)_92%,white)]"
                         : "fill-[color-mix(in_srgb,var(--z-brand)_85%,white)]"
                     )}
-                    onMouseEnter={() => setHovered({ title: x.title, tickets: x.tickets })}
-                    onFocus={() => setHovered({ title: x.title, tickets: x.tickets })}
+                    onMouseEnter={() => setHovered({ title: x.title, tickets: x.tickets, x: cx, y: by })}
+                    onFocus={() => setHovered({ title: x.title, tickets: x.tickets, x: cx, y: by })}
                     onClick={() => onSelect(x.id)}
                     role="button"
                     tabIndex={0}
                     aria-label={`Open feature request: ${x.title}`}
                   />
-
-                  <text
-                    x={cx}
-                    y={padT + ih + 14}
-                    textAnchor="end"
-                    fontSize="10"
-                    fill="#64748b"
-                    transform={`rotate(-45 ${cx} ${padT + ih + 14})`}
-                  >
-                    {x.title.length > 24 ? `${x.title.slice(0, 24)}…` : x.title}
-                  </text>
                 </g>
               );
             })}
           </svg>
-        </div>
 
-        {hovered ? (
-          <div className="pointer-events-none absolute right-4 top-4 w-[240px] rounded-lg border border-[var(--z-border)] bg-white p-3 text-xs text-slate-700 shadow-lg">
-            <div className="text-[13px] font-semibold text-slate-900">{hovered.title}</div>
-            <div className="mt-2">
-              <span className="text-slate-500">Tickets:</span>{" "}
-              <span className="font-semibold text-slate-900">{hovered.tickets}</span>
+          {/* full x-axis labels (wrapped) */}
+          <div className="min-w-[820px] w-full pb-1">
+            <div
+              className="-mt-1 grid items-start gap-2 text-center text-[11px] leading-snug text-slate-500"
+              style={{
+                paddingLeft: `${padLPct}%`,
+                paddingRight: `${padRPct}%`,
+                gridTemplateColumns: `repeat(${Math.max(1, top.length)}, minmax(0, 1fr))`,
+              }}
+            >
+              {top.map((x) => (
+                <div key={x.id} className="min-w-0 break-words">
+                  {x.title}
+                </div>
+              ))}
             </div>
           </div>
-        ) : null}
+        </div>
+
+        {hovered ? (() => {
+          const leftPct = (hovered.x / w) * 100;
+          const topPct = (hovered.y / h) * 100;
+          const flipX = leftPct > 70;
+          const clampedLeft = Math.min(96, Math.max(4, leftPct));
+          const clampedTop = Math.min(92, Math.max(8, topPct));
+          const transform = [
+            `translate(${flipX ? "-100%" : "-50%"}, -100%)`,
+            `translate(${flipX ? "-8px" : "0"}, -10px)`,
+          ].join(" ");
+
+          return (
+            <div
+              className="pointer-events-none absolute z-10 w-[240px] rounded-lg border border-[var(--z-border)] bg-white p-3 text-xs text-slate-700 shadow-lg"
+              style={{
+                left: `${clampedLeft}%`,
+                top: `${clampedTop}%`,
+                transform,
+              }}
+            >
+              <div className="text-[13px] font-semibold text-slate-900">{hovered.title}</div>
+              <div className="mt-2">
+                <span className="text-slate-500">Tickets:</span>{" "}
+                <span className="font-semibold text-slate-900">{hovered.tickets}</span>
+              </div>
+            </div>
+          );
+        })() : null}
       </div>
     </div>
   );
@@ -415,7 +433,7 @@ function PatternMap({
             Pattern Map — Severity vs Volume
           </div>
           <div className="mt-1 text-xs text-slate-600">
-            Bubble size = share of total. Color = trend direction. Click a bubble to see tickets.
+    
           </div>
         </div>
         <button
@@ -625,12 +643,14 @@ function TicketDrawer({
   subtitle,
   tickets: drawerTickets,
   onClose,
+  ticketActions,
 }: {
   open: boolean;
   title: string;
   subtitle?: string;
   tickets: Ticket[];
   onClose: () => void;
+  ticketActions?: (t: Ticket) => React.ReactNode;
 }) {
   return (
     <div
@@ -663,14 +683,14 @@ function TicketDrawer({
               {subtitle ? <div className="mt-1 text-xs text-slate-600">{subtitle}</div> : null}
               <div className="mt-2 text-xs text-slate-500">{drawerTickets.length} tickets</div>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-md border border-[var(--z-border)] bg-white px-2 py-1 text-xs text-slate-700 hover:bg-[var(--z-hover)]"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-md border border-[var(--z-border)] bg-white px-2 py-1 text-xs text-slate-700 hover:bg-[var(--z-hover)]"
+                aria-label="Close"
+              >
+                ✕
+              </button>
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto p-4">
@@ -710,20 +730,23 @@ function TicketDrawer({
                         ))}
                       </div>
                     </div>
-                    <div className="shrink-0">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-1 text-[11px] font-semibold",
-                          t.priority === "urgent"
-                            ? "bg-rose-100 text-rose-700"
-                            : t.priority === "high"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-slate-100 text-slate-700"
-                        )}
-                      >
-                        {t.priority}
-                      </span>
-                    </div>
+                      <div className="shrink-0">
+                        <div className="flex flex-col items-end gap-2">
+                          {ticketActions ? <div className="shrink-0">{ticketActions(t)}</div> : null}
+                          <span
+                            className={cn(
+                              "rounded-full px-2 py-1 text-[11px] font-semibold",
+                              t.priority === "urgent"
+                                ? "bg-rose-100 text-rose-700"
+                                : t.priority === "high"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-slate-100 text-slate-700"
+                            )}
+                          >
+                            {t.priority}
+                          </span>
+                        </div>
+                      </div>
                   </div>
                 </Link>
               ))}
@@ -859,6 +882,9 @@ export function AnalyticsDashboard() {
   const [pushState, setPushState] = React.useState<
     Record<string, "idle" | "pushing" | "success" | "error">
   >({});
+  const [ticketPushState, setTicketPushState] = React.useState<
+    Record<string, "idle" | "pushing" | "success" | "error">
+  >({});
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [drawerPatternTitle, setDrawerPatternTitle] = React.useState<string | null>(null);
@@ -992,6 +1018,28 @@ export function AnalyticsDashboard() {
       setPushState((s) => ({ ...s, [requestId]: "error" }));
       window.setTimeout(() => {
         setPushState((s) => ({ ...s, [requestId]: "idle" }));
+      }, 2500);
+    }
+  }
+
+  async function pushTicketToSalesforce(ticketId: string) {
+    setTicketPushState((s) => ({ ...s, [ticketId]: "pushing" }));
+    try {
+      const t = getTicket(ticketId);
+      const res = await fetch("/api/integrations/salesforce/push-ticket", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ticket: t, ticketId }),
+      });
+      if (!res.ok) throw new Error(`Push failed (${res.status})`);
+      setTicketPushState((s) => ({ ...s, [ticketId]: "success" }));
+      window.setTimeout(() => {
+        setTicketPushState((s) => ({ ...s, [ticketId]: "idle" }));
+      }, 2500);
+    } catch {
+      setTicketPushState((s) => ({ ...s, [ticketId]: "error" }));
+      window.setTimeout(() => {
+        setTicketPushState((s) => ({ ...s, [ticketId]: "idle" }));
       }, 2500);
     }
   }
@@ -1433,7 +1481,6 @@ export function AnalyticsDashboard() {
 
                       <div className="divide-y divide-[var(--z-border)]">
                         {filteredFeatureRows.map((r) => {
-                          const state = pushState[r.id] ?? "idle";
                           return (
                             <div
                               key={r.id}
@@ -1497,14 +1544,6 @@ export function AnalyticsDashboard() {
                                 <span className="text-sm font-semibold text-slate-900">
                                   {r.tickets}
                                 </span>
-                                <Button
-                                  variant="primary"
-                                  size="sm"
-                                  disabled={state === "pushing"}
-                                  onClick={() => pushToSalesforce(r.id)}
-                                >
-                                  {state === "pushing" ? "Pushing…" : "Push"}
-                                </Button>
                               </div>
                             </div>
                           );
@@ -1549,6 +1588,23 @@ export function AnalyticsDashboard() {
             : undefined
         }
         tickets={drawerTickets}
+        ticketActions={(t) => {
+          const state = ticketPushState[t.id] ?? "idle";
+          return (
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={state === "pushing"}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                pushTicketToSalesforce(t.id);
+              }}
+            >
+              {state === "pushing" ? "Pushing…" : state === "success" ? "Pushed" : "Push"}
+            </Button>
+          );
+        }}
         onClose={() => {
           setDrawerOpen(false);
           setDrawerPatternTitle(null);
