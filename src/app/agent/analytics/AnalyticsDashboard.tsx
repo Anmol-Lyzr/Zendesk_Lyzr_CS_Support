@@ -491,7 +491,7 @@ function PatternMap({
                   x={xx}
                   y={h - 18}
                   textAnchor="middle"
-                  fontSize="12"
+                  fontSize="8"
                   fill="#64748b"
                 >
                   {label}
