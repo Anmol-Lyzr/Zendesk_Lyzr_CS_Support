@@ -188,7 +188,7 @@ function FeatureRequestsBarChart({
             viewBox={`0 0 ${w} ${h}`}
             className="min-w-[820px] w-full"
             role="img"
-            aria-label="Feature requests bar chart"
+            aria-label="Feature Requests Bar Chart"
             onMouseLeave={() => setHovered(null)}
           >
             {/* grid + y axis */}
@@ -1410,7 +1410,7 @@ export function AnalyticsDashboard() {
               </CollapsibleSection>
 
             <CollapsibleSection
-              title="Feature requests"
+              title="Feature Requests"
               subtitle="Detected product requests you can push to Salesforce"
               right={
                 featureLoading ? (
