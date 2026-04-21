@@ -1229,7 +1229,7 @@ export function AnalyticsDashboard() {
 
             <div className="mt-5 grid grid-cols-1 gap-5">
               <CollapsibleSection
-                title="Issue pattern recognition"
+                title="Issue Pattern Recognition"
                 subtitle={
                   allRange ? `Across all tickets (${formatWeekLabel(allRange.start, allRange.end)})` : "Across all tickets"
                 }
