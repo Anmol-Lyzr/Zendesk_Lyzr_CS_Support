@@ -1,6 +1,10 @@
+"use client";
+
+import * as React from "react";
 import type { Ticket } from "@/lib/mockTickets";
 import { cn } from "@/lib/cn";
 import { formatShortDateTime } from "@/lib/dates";
+import { useConversationStore } from "@/app/agent/_state/conversationStore";
 
 function authorRoleBadge(authorType: "customer" | "agent" | "system") {
   switch (authorType) {
@@ -27,12 +31,18 @@ function authorRoleBadge(authorType: "customer" | "agent" | "system") {
 }
 
 export function ConversationThread({ ticket }: { ticket: Ticket }) {
+  const { messagesByTicketId } = useConversationStore();
+  const allMessages = React.useMemo(() => {
+    const localMessages = messagesByTicketId[ticket.id] ?? [];
+    return [...ticket.conversation, ...localMessages];
+  }, [messagesByTicketId, ticket.conversation, ticket.id]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-[var(--z-canvas)] px-6 py-5">
       <div className="mx-auto w-full max-w-[760px]">
         <div className="rounded-xl border border-[var(--z-border)] bg-[var(--z-panel)] px-5 py-5">
           <div className="space-y-5">
-          {ticket.conversation
+          {allMessages
             .slice()
             .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
             .reverse()

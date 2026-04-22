@@ -5,10 +5,30 @@ import type { Ticket } from "@/lib/mockTickets";
 import { Button } from "@/app/agent/_components/ui/Button";
 import { Paperclip, SendHorizontal, Smile } from "lucide-react";
 import { useDraftStore } from "@/app/agent/_state/draftStore";
+import { useConversationStore } from "@/app/agent/_state/conversationStore";
 
 export function ReplyComposer({ ticket }: { ticket: Ticket }) {
   const { draftByTicketId, setDraft } = useDraftStore();
   const value = draftByTicketId[ticket.id] ?? "";
+  const { appendMessage } = useConversationStore();
+
+  const canSend = value.trim().length > 0;
+
+  const send = React.useCallback(() => {
+    const body = value.trim();
+    if (!body) return;
+
+    appendMessage(ticket.id, {
+      id: `local_${ticket.id}_${Date.now()}`,
+      authorName: ticket.assigneeName,
+      authorType: "agent",
+      visibility: "public",
+      createdAt: new Date().toISOString(),
+      body,
+    });
+
+    setDraft(ticket.id, "");
+  }, [appendMessage, setDraft, ticket.assigneeName, ticket.id, value]);
 
   return (
     <div className="border-t border-[var(--z-border)] bg-[var(--z-panel)] px-6 py-4">
@@ -32,6 +52,12 @@ export function ReplyComposer({ ticket }: { ticket: Ticket }) {
             onChange={(e) => setDraft(ticket.id, e.target.value)}
             placeholder="Type your reply…"
             className="h-28 w-full resize-none border-0 bg-white px-4 py-3 text-sm leading-relaxed text-slate-900 outline-none placeholder:text-slate-500 dark:text-slate-900"
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                send();
+              }
+            }}
           />
           <div className="flex items-center justify-between border-t border-[var(--z-border)] bg-[var(--z-panel-2)] px-3 py-2">
             <div className="flex items-center gap-1">
@@ -54,7 +80,7 @@ export function ReplyComposer({ ticket }: { ticket: Ticket }) {
               <Button variant="secondary" size="sm">
                 Submit as Open
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" onClick={send} disabled={!canSend}>
                 <SendHorizontal className="h-4 w-4" />
                 Send
               </Button>
